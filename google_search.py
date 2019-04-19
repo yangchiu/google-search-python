@@ -21,30 +21,78 @@ class GoogleSearch(object):
         self.engine_url = 'https://www.google.com/search?q='
         self.max_retry_times = 10
         
+        self.rep = {'<b>': '',
+                    '</b>': '',
+                    '<br/>': '',
+                    '<span class="st">': '',
+                    '</span>': '',
+                    '<em>': '',
+                    '</em>': '',
+                    '\n': '',
+                    '\xa0': ''}
+        self.rep = dict((re.escape(k), v) for k, v in self.rep.items())
+        self.rep_pattern = re.compile("|".join(self.rep.keys()))
+        
     def parse_page(self, page):
         page = BeautifulSoup(page, 'lxml')
+        
+        filename = "sample4.html"
+        myfile = open(filename, 'w')
+        myfile.write(str(page))
+        myfile.close()
+        
         results = []
         
-        pattern = re.compile('http.*(?=\&sa\=U)|http.*')
-        
         try:
+            # collect all search result entries
             divs = page.find_all('div', 'g')
             #print(divs)
             for div in divs:
+                # init object
                 result = {}
-                st = div.find('span', {'class': 'st'})
-                if st:
-                    result_url = pattern.findall(div.find('a')['href'])
-                    if not result_url:
-                        continue
-                    result['href'] = urllib.request.unquote(result_url[0])
-                    print(f'href = {result["href"]}')
                 
-                    result['title'] = div.find('h3').text
-                    print(f'title = {result["title"]}')
+                # get href
+                pattern = re.compile('http.*(?=\&sa\=U)|http.*')
+                result_url = pattern.findall(div.find('a')['href'])
+                if not result_url:
+                    continue
+                else:
+                    result['href'] = urllib.request.unquote(result_url[0])
                     
+                # get title and summary
+                st = div.find('span', {'class': 'st'})
+                if not st:
+                    continue
+                else:
+                    result['title'] = div.find('h3').text
                     result['summary'] = st.text
-                    results.append(result)
+                    
+                # get mime type
+                mime = div.find('span', {'class': 'mime'})
+                if not mime:
+                    result['mime'] = 'web'
+                else:
+                    result['mime'] = mime.text
+                
+                # collect results
+                results.append(result)
+                
+                # extract the best matched sentence in the summary
+                summary_list = re.split('\s-\s|\.{3,}', str(st))
+                max_count = 0
+                max_count_index = 0
+                for index, sub in enumerate(summary_list):
+                    count = sub.count('<b>')
+                    if count > max_count:
+                        max_count = count
+                        max_count_index = index
+                if max_count != 0:
+                    best = self.rep_pattern.sub(lambda m: self.rep[re.escape(m.group(0))],
+                                                summary_list[max_count_index])
+                else:
+                    best = ''
+                result['best_matched'] = best
+                
             return results
         except Exception as error:
             fileName = time.time()
@@ -78,7 +126,7 @@ class GoogleSearch(object):
         return results
     
 if __name__ == '__main__':
-    query = 'We generated two sets of decoy poses-one treating DNA as the static molecule with a translating/rotating protein referred to as the sDNA decoy set'
+    query = 'deep convolutional neural network to classify the 1.2 million high-resolution images in the ImageNet LSVRC-2010 contest into the 1000 dif- ferent'
     searcher = GoogleSearch()
     results = searcher.search(query)
     print(results)

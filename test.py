@@ -36,7 +36,7 @@ while (response is None) and currentRetryTimes<retryTimes:
     except urllib.request.HTTPError as e: 
         raise self.handleHTTPError(e)
     except urllib.request.URLError as e:
-        currentRetryTimes +=1
+        currentRetryTimes += 1
         print('retry {times}!'.format(times=currentRetryTimes))
         if currentRetryTimes == retryTimes:
             raise e
@@ -101,15 +101,15 @@ result = filter(visible, data)
 text = ''.join(result)
 
 #print("+++++++++++++++++++++++++++++++++++++")
-#filename = "soup.html"
+#filename = "sample2.html"
  
 # Open the file with writing permission
-myfile = open(filename, 'w')
+#myfile = open(filename, 'w')
  
 # Write a line to the file
-myfile.write(text)
+#myfile.write(str(unZipResult))
  
 # Close the file
-myfile.close()
+#myfile.close()
  
 #print(text)
