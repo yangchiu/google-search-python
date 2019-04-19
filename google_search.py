@@ -53,11 +53,11 @@ class GoogleSearch(object):
                 
                 # get href
                 pattern = re.compile('http.*(?=\&sa\=U)|http.*')
-                result_url = pattern.findall(div.find('a')['href'])
-                if not result_url:
-                    continue
-                else:
+                try:
+                    result_url = pattern.findall(div.find('a')['href'])
                     result['href'] = urllib.request.unquote(result_url[0])
+                except:
+                    continue
                     
                 # get title and summary
                 st = div.find('span', {'class': 'st'})
@@ -65,6 +65,9 @@ class GoogleSearch(object):
                     continue
                 else:
                     result['title'] = div.find('h3').text
+                if not st.text:
+                    continue
+                else:
                     result['summary'] = st.text
                     
                 # get mime type
@@ -91,7 +94,7 @@ class GoogleSearch(object):
                                                 summary_list[max_count_index])
                 else:
                     best = ''
-                result['best_matched'] = best
+                result['best_matched'] = best.strip()
                 
             return results
         except Exception as error:
