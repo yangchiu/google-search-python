@@ -43,7 +43,7 @@ class ResultMatch(object):
         return True
         
     def match(self, url, sentence):
-        print(url)
+        #print(url)
         # visit the page
         self.driver.get(url)
         # after page loaded, get its source
@@ -64,48 +64,53 @@ class ResultMatch(object):
             end_index = index + sent_len
             end_index = end_index + self.extend_range if end_index + self.extend_range < text_len else text_len - 1
             # deal with tokenization
-            print(f'before strip: {text[start_index:end_index]}')
+            #print(f'before strip: {text[start_index:end_index]}')
             return self.strip(text[start_index:end_index])
         # if cannot find the sentence in the article, just return the orig sentence
         else:
             return sentence
 
 if __name__ == '__main__':
-    #query = 'deep convolutional neural network to classify the 1.2 million high-resolution images in the ImageNet LSVRC-2010 contest into the 1000 dif- ferent'
-    #query = '各國迫切需要達成巴黎協定目標，以控制全球暖化在高於工業化前水平2°C以內。'
-    query = 'we restricted our docking study to the 76 out of 104 cases where the protein binds to a single molecule of dsDNA'
-    #query = 'and hidden unit j are on together when the feature detectors are being driven by images from the training set and'
-    #query = 'To achieve its impressive performance in tasks such as speech perception or object recognition, the brain extracts multiple levels of representation from the sensory input'
-    #query = 'a new learning algorithm that alleviates the problem of the potential convergence to a steady-state, named Active Hebbian Learning (AHL) is presented, validated and implemented'
-    #query = 'In the past several years, a number of different language modeling improvements over simple trigram models have been found,'
+    query_list = ['deep convolutional neural network to classify the 1.2 million high-resolution images in the ImageNet LSVRC-2010 contest into the 1000 dif- ferent',
+                  '各國迫切需要達成巴黎協定目標，以控制全球暖化在高於工業化前水平2°C以內。',
+                  'we restricted our docking study to the 76 out of 104 cases where the protein binds to a single molecule of dsDNA',
+                  'and hidden unit j are on together when the feature detectors are being driven by images from the training set and',
+                  'To achieve its impressive performance in tasks such as speech perception or object recognition, the brain extracts multiple levels of representation from the sensory input',
+                  'a new learning algorithm that alleviates the problem of the potential convergence to a steady-state, named Active Hebbian Learning (AHL) is presented, validated and implemented',
+                  'In the past several years, a number of different language modeling improvements over simple trigram models have been found,'
+                  ]
     
-    # query a string in google
     searcher = GoogleSearch()
-    results = searcher.search(query)
-    print(results)
-    
-    # get a query result summary provided by google
-    # and
-    # get the url of this query result webpage
-    # then
-    # get the full article of this webpage
-    # then
-    # search for the query result summary in the full article
-    # finally
-    # get a longer summary
     result_match = ResultMatch()
-    entry = {}
-    for result in results:
-        if result['mime'] == 'web':
-            entry = result
-            break
-    print(f'search for: {entry["best_matched"]}')
-    res = result_match.match(entry['href'], entry['best_matched'])
-    print(f'extended result: {res}')
     
+    for index, query in enumerate(query_list):
+        
+        print(f'=================== TestCase {index} ===================')
+        print(f'query string: {query}')
     
-    filename = "dynamic_result.html"
-    file = open(filename, 'w')
-    file.write(res)
-    file.close()
+        # query a string in google
+        results = searcher.search(query)
+        #print(results)
+    
+        # get a query result summary provided by google
+        # and
+        # get the url of this query result webpage
+        # then
+        # get the full article of this webpage
+        # then
+        # search for the query result summary in the full article
+        # finally
+        # get a longer summary
+        for result in results:
+            if result['mime'] == 'web':
+                entry = result
+                break
+        print(f'search for: {entry["best_matched"]}')
+        res = result_match.match(entry['href'], entry['best_matched'])
+        print(f'extended result: {res}')
+    
+        filename = "dynamic_result.html"
+        file = open(filename, 'w')
+        file.write(res)
+        file.close()
 
