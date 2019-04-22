@@ -129,7 +129,7 @@ class GoogleSearch(object):
         return results
     
 if __name__ == '__main__':
-    query = 'deep convolutional neural network to classify the 1.2 million high-resolution images in the ImageNet LSVRC-2010 contest into the 1000 dif- ferent'
+    query = 'number of copies that all have the same weights but have progressively more negative biases. The learning and inference rules for these “Stepped'
     searcher = GoogleSearch()
     results = searcher.search(query)
     print(results)
